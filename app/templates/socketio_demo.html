@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>Socketio Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1>Hello, MyDrivers</h1>
+    <script type="text/javascript" charset="utf-8">
+         $(document).ready(function() {
+            namespace = '/client_name';
+
+            var socket = io.connect(location.protocol
+                        + '//' + document.domain + ':'
+                        + location.port + namespace);
+            socket.on('connect', function() {
+                socket.emit('connected', {Client: 'I\'m connected!'})});
+
+            socket.on('connectConfirm', function(server) {
+                console.log('Server: '+server.Server)});
+
+            function dataStartOrStop(th,tp,gh,gp){
+                let textStartOrStopH = document.createTextNode(th);
+                let textStartOrStopP = document.createTextNode(tp);
+                let getH = document.getElementById(gh);
+                let getP = document.getElementById(gp);
+                getH.appendChild(textStartOrStopH);
+                getP.appendChild(textStartOrStopP);
+            }
+
+            function dataRecords(trh, ttp, trs, tre, ghr,gpr){
+                let textRecordsH = document.createTextNode(trh);
+                let textTagTimeP = document.createTextNode(ttp);
+                let textRecordStart = document.createTextNode(trs);
+                let textRecordEnd = document.createTextNode(tre);
+                let getHR = document.getElementById(ghr);
+                let getPR = document.getElementById(gpr);
+                getHR.appendChild(textRecordsH);
+                getPR.appendChild(textTagTimeP);
+                getPR.appendChild(textRecordStart);
+                getPR.appendChild(textRecordEnd);
+            }
+
+            socket.on('start', function(json){
+                let jsonData=JSON.parse(json);
+                dataStartOrStop(jsonData.message, jsonData.start_time, 'start', 'time_start')
+            });
+
+            socket.on('records', function(json){
+                let jsonDataR=JSON.parse(json);
+                dataRecords(jsonDataR.message, jsonDataR.tag_time, jsonDataR.send_record_from,jsonDataR.sending_ends_at,'records', 'time_records')
+            });
+
+            socket.on('stop', function(json){
+                let jsonDataE=JSON.parse(json);
+                dataStartOrStop(jsonDataE.message, jsonDataE.stop_time, 'stop', 'time_stop')
+            });
+         });
+    </script>
+    <div id="container">
+        <h2 id="start"></h2>
+        <p id="time_start"></p>
+        <h2 id="records"></h2>
+        <p id="time_records"></p>
+        <h2 id="stop"></h2>
+        <p id="time_stop"></p>
+    </div>
+
+</body>
+</html>
